@@ -65,11 +65,24 @@ nfpms:
     formats:
       - ipk
     bindir: /opt/bin
-    # Map Go arch to Entware arch labels for filename and architecture field.
-    replacements:
-      amd64: x64-3.2
-      arm64: aarch64-3.10
-    file_name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Arch }}'
+    # Use Entware-style arch labels in filename and control field.
+    file_name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_
+      {{- if eq .Arch "amd64" }}x64-3.2
+      {{- else if eq .Arch "arm64" }}aarch64-3.10
+      {{- else }}{{ .Arch }}{{ end }}
+    # IPK packager-specific settings.
+    ipk:
+      # Set control Architecture to Entware arch names per target.
+      arch: >-
+        {{- if eq .Arch "amd64" }}x64-3.2
+        {{- else if eq .Arch "arm64" }}aarch64-3.10
+        {{- else }}{{ .Arch }}{{ end }}
+      # Set ABI version to match Entware naming.
+      abi_version: >-
+        {{- if eq .Arch "amd64" }}3.2
+        {{- else if eq .Arch "arm64" }}3.10
+        {{- else }}{{ "" }}{{ end }}
     ids:
       - synolintology143
 
