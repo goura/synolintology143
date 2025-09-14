@@ -55,25 +55,40 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build IPK packages (alpine edge)
+      - name: Verify release binaries exist
         if: startsWith(github.ref, 'refs/tags/')
-        uses: docker://alpine:edge
+        run: |
+          ls -la dist
+          test -f dist/synolintology143_linux_amd64/synolintology143
+          test -f dist/synolintology143_linux_arm64/synolintology143
+
+      - name: Build IPK (amd64) in Alpine
+        if: startsWith(github.ref, 'refs/tags/')
         env:
           TAG_NAME: ${{ github.ref_name }}
-        with:
-          entrypoint: /bin/sh
-          args: -lc "set -e; cd /github/workspace && \
+        run: |
+          docker run --rm -v "$PWD":/work -w /work alpine:edge /bin/sh -ceu '
             apk add --no-cache \
               --repository https://dl-cdn.alpinelinux.org/alpine/edge/main \
               --repository https://dl-cdn.alpinelinux.org/alpine/edge/community \
               --repository https://dl-cdn.alpinelinux.org/alpine/edge/testing \
-              python3 opkg-utils >/dev/null && \
-            ls -la dist && \
-            test -f dist/synolintology143_linux_amd64/synolintology143 && \
-            test -f dist/synolintology143_linux_arm64/synolintology143 && \
-            sh scripts/build-ipk.sh dist/synolintology143_linux_amd64/synolintology143 \"$TAG_NAME\" linux_amd64 synolintology143 && \
-            sh scripts/build-ipk.sh dist/synolintology143_linux_arm64/synolintology143 \"$TAG_NAME\" linux_arm64 synolintology143 && \
-            ls -la dist/*.ipk"
+              python3 opkg-utils >/dev/null
+            sh scripts/build-ipk.sh dist/synolintology143_linux_amd64/synolintology143 "${TAG_NAME}" linux_amd64 synolintology143
+          '
+
+      - name: Build IPK (arm64) in Alpine
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          docker run --rm -v "$PWD":/work -w /work alpine:edge /bin/sh -ceu '
+            apk add --no-cache \
+              --repository https://dl-cdn.alpinelinux.org/alpine/edge/main \
+              --repository https://dl-cdn.alpinelinux.org/alpine/edge/community \
+              --repository https://dl-cdn.alpinelinux.org/alpine/edge/testing \
+              python3 opkg-utils >/dev/null
+            sh scripts/build-ipk.sh dist/synolintology143_linux_arm64/synolintology143 "${TAG_NAME}" linux_arm64 synolintology143
+          '
 
       - name: Upload IPK assets to release
         if: startsWith(github.ref, 'refs/tags/')
