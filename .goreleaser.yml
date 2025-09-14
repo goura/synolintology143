@@ -1,4 +1,5 @@
 # .goreleaser.yml
+version: 2
 project_name: synolintology143
 
 before:
@@ -25,7 +26,7 @@ archives:
   - id: archives
     # Sets the name like: synolintology143_1.0.0_linux_amd64.tar.gz
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
-    format: tar.gz
+    formats: [tar.gz]
     # Include the license and README in the archive for good vibes.
     files:
       - LICENSE
@@ -42,8 +43,8 @@ nfpms:
     license: MIT
     formats:
       - deb
-    # Tell nfpm to use the binaries we defined in the 'builds' section above.
-    builds:
+    # Use build IDs defined in the 'builds' section above.
+    ids:
       - synolintology143
 
 # changelog from git commit messages.
