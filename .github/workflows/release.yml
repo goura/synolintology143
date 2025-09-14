@@ -55,14 +55,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build IPK packages (alpine)
+      - name: Build IPK packages (alpine edge)
         if: startsWith(github.ref, 'refs/tags/')
-        uses: docker://alpine:3
+        uses: docker://alpine:edge
         env:
           TAG_NAME: ${{ github.ref_name }}
         with:
           entrypoint: /bin/sh
-          args: -lc "apk add --no-cache opkg-utils >/dev/null && \
+          args: -lc "set -e; cd /github/workspace && \
+            echo 'https://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories && \
+            apk add --no-cache opkg-utils >/dev/null && \
             ls -la dist && \
             test -f dist/synolintology143_linux_amd64/synolintology143 && \
             test -f dist/synolintology143_linux_arm64/synolintology143 && \
