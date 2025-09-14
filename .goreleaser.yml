@@ -73,16 +73,19 @@ nfpms:
       {{- else }}{{ .Arch }}{{ end }}
     # IPK packager-specific settings.
     ipk:
-      # Set control Architecture to Entware arch names per target.
-      arch: >-
-        {{- if eq .Arch "amd64" }}x64-3.2
-        {{- else if eq .Arch "arm64" }}aarch64-3.10
-        {{- else }}{{ .Arch }}{{ end }}
       # Set ABI version to match Entware naming.
       abi_version: >-
         {{- if eq .Arch "amd64" }}3.2
         {{- else if eq .Arch "arm64" }}3.10
         {{- else }}{{ "" }}{{ end }}
+      # Override control fields.
+      fields:
+        Architecture: >-
+          {{- if eq .Arch "amd64" }}x64-3.2
+          {{- else if eq .Arch "arm64" }}aarch64-3.10
+          {{- else }}{{ .Arch }}{{ end }}
+        Section: utils
+        Priority: optional
     ids:
       - synolintology143
 
