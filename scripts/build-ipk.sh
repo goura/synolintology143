@@ -53,7 +53,15 @@ Homepage: https://github.com/goura/synolintology143
 Description: Find filenames exceeding eCryptfs 143-byte limit.
 EOF
 
-# Build .ipk into dist/
-opkg-build -Z gzip -o dist "$WORK_DIR" >/dev/null
+# Build .ipk into dist/ (note: opkg-build expects output dir as positional arg)
+opkg-build -Z gzip "$WORK_DIR" dist
 
-echo "Built IPK: $(ls -1 dist/${NAME}_${VERSION}_*.ipk)"
+IPK_PATH="dist/${NAME}_${VERSION}_${ENTWARE_ARCH}.ipk"
+if [ -f "$IPK_PATH" ]; then
+  echo "Built IPK: $IPK_PATH"
+else
+  echo "IPK not found at expected path: $IPK_PATH" >&2
+  echo "dist/ contents:" >&2
+  ls -la dist >&2 || true
+  exit 1
+fi
