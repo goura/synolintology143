@@ -23,6 +23,9 @@ builds:
     # Make GOAMD64 explicit so dist folder names are stable (linux_amd64_v1)
     goamd64:
       - v1
+    # Make GOARM64 explicit so dist folder names are stable (linux_arm64_v8.0)
+    goarm64:
+      - v8.0
 
 # "Entware-style" install
 archives:
