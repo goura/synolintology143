@@ -49,7 +49,27 @@ nfpms:
     license: MIT
     formats:
       - deb
+    # Install binary under /opt/bin to match Entware usage.
+    bindir: /opt/bin
     # Use build IDs defined in the 'builds' section above.
+    ids:
+      - synolintology143
+
+  - id: ipks
+    package_name: synolintology143
+    vendor: 'goura'
+    homepage: 'https://github.com/goura/synolintology143'
+    maintainer: 'Goura <goura@example.com>'
+    description: A CLI tool to find filenames that violate the Synology eCryptfs 143-byte limit.
+    license: MIT
+    formats:
+      - ipk
+    bindir: /opt/bin
+    # Map Go arch to Entware arch labels for filename and architecture field.
+    replacements:
+      amd64: x64-3.2
+      arm64: aarch64-3.10
+    file_name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Arch }}'
     ids:
       - synolintology143
 
@@ -66,8 +86,3 @@ changelog:
       - '^ci:'
       - 'Merge pull request'
       - 'Merge branch'
-
-release:
-  # .ipk artifacts are built and attached in a separate workflow step
-  # after GoReleaser finishes, because opkg-utils isn't available in the
-  # goreleaser action image on ubuntu-latest.
