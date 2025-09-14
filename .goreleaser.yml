@@ -55,34 +55,6 @@ nfpms:
     ids:
       - synolintology143
 
-  - id: ipks
-    package_name: synolintology143
-    vendor: 'goura'
-    homepage: 'https://github.com/goura/synolintology143'
-    maintainer: 'Goura <goura@example.com>'
-    description: A CLI tool to find filenames that violate the Synology eCryptfs 143-byte limit.
-    license: MIT
-    formats:
-      - ipk
-    bindir: /opt/bin
-    # Use Entware-style arch labels in filename and control field.
-    file_name_template: >-
-      {{ .ProjectName }}_{{ .Version }}_
-      {{- if eq .Arch "amd64" }}x64-3.2
-      {{- else if eq .Arch "arm64" }}aarch64-3.10
-      {{- else }}{{ .Arch }}{{ end }}
-    # IPK packager-specific settings.
-    ipk:
-      fields:
-        Architecture: >-
-          {{- if eq .Arch "amd64" }}x86_64
-          {{- else if eq .Arch "arm64" }}aarch64
-          {{- else }}{{ .Arch }}{{ end }}
-        Section: utils
-        Priority: optional
-    ids:
-      - synolintology143
-
 # changelog from git commit messages.
 changelog:
   sort: asc
