@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Pre-commit hook to enforce gofmt on staged Go files.
+
+# Collect staged .go files (added, copied, modified, renamed)
+mapfile -d '' -t files < <(git diff --cached --name-only -z --diff-filter=ACMR -- '*.go') || true
+
+if (( ${#files[@]} == 0 )); then
+  exit 0
+fi
+
+unformatted=""
+if ! unformatted=$(gofmt -l "${files[@]}"); then
+  # gofmt itself should not fail; if it does, fail the commit
+  echo "gofmt failed to run." >&2
+  exit 1
+fi
+
+if [ -n "$unformatted" ]; then
+  echo "gofmt found unformatted files:" >&2
+  echo "$unformatted" >&2
+  echo >&2
+  echo "Fix by running:" >&2
+  echo "  gofmt -w $unformatted" >&2
+  exit 1
+fi
+
+exit 0
+

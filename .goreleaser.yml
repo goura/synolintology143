@@ -1,0 +1,62 @@
+# .goreleaser.yml
+project_name: synolintology143
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  - id: synolintology143
+    # The name of the binary file that gets created.
+    binary: synolintology143
+    # Path to the main.go file.
+    main: ./cmd/synolintology143/
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
+# "Entware-style" install
+archives:
+  - id: archives
+    # Sets the name like: synolintology143_1.0.0_linux_amd64.tar.gz
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    format: tar.gz
+    # Include the license and README in the archive for good vibes.
+    files:
+      - LICENSE
+      - README.md
+
+# nfpm to create native Debian packages (.deb).
+nfpms:
+  - id: debs
+    package_name: synolintology143
+    vendor: 'goura'
+    homepage: 'https://github.com/goura/synolintology143'
+    maintainer: 'Goura <goura@example.com>'
+    description: A CLI tool to find filenames that violate the Synology eCryptfs 143-byte limit.
+    license: MIT
+    formats:
+      - deb
+    # Tell nfpm to use the binaries we defined in the 'builds' section above.
+    builds:
+      - synolintology143
+
+# changelog from git commit messages.
+changelog:
+  sort: asc
+  filters:
+    # Exclude boring commits from the changelog.
+    exclude:
+      - '^doc:'
+      - '^docs:'
+      - '^test:'
+      - '^tests:'
+      - '^ci:'
+      - 'Merge pull request'
+      - 'Merge branch'
+

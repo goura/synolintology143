@@ -1,0 +1,18 @@
+repos:
+  - repo: local
+    hooks:
+      - id: gofmt
+        name: gofmt (check formatting)
+        language: system
+        types: [go]
+        pass_filenames: true
+        require_serial: true
+        entry: bash -c 'rc=0; for f in "$@"; do if [ -f "$f" ]; then out=$(gofmt -l "$f"); if [ -n "$out" ]; then echo "$out" >&2; rc=1; fi; fi; done; exit $rc' --
+      - id: gofmt-fix
+        name: gofmt -w (auto-fix)
+        language: system
+        types: [go]
+        pass_filenames: true
+        stages: [manual]
+        entry: gofmt -w
+
