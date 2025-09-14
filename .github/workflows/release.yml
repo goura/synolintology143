@@ -75,6 +75,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         env:
           TAG_NAME: ${{ github.ref_name }}
+          AMD64_BIN: ${{ steps.locate_bins.outputs.amd64_bin }}
         run: |
           docker run --rm -v "$PWD":/work -w /work alpine:edge /bin/sh -ceu '
             apk add --no-cache \
@@ -84,13 +85,12 @@ jobs:
               python3 opkg-utils >/dev/null
             sh scripts/build-ipk.sh "${AMD64_BIN}" "${TAG_NAME}" linux_amd64 synolintology143
           '
-        env:
-          AMD64_BIN: ${{ steps.locate_bins.outputs.amd64_bin }}
 
       - name: Build IPK (arm64) in Alpine
         if: startsWith(github.ref, 'refs/tags/')
         env:
           TAG_NAME: ${{ github.ref_name }}
+          ARM64_BIN: ${{ steps.locate_bins.outputs.arm64_bin }}
         run: |
           docker run --rm -v "$PWD":/work -w /work alpine:edge /bin/sh -ceu '
             apk add --no-cache \
@@ -100,8 +100,6 @@ jobs:
               python3 opkg-utils >/dev/null
             sh scripts/build-ipk.sh "${ARM64_BIN}" "${TAG_NAME}" linux_arm64 synolintology143
           '
-        env:
-          ARM64_BIN: ${{ steps.locate_bins.outputs.arm64_bin }}
 
       - name: Upload IPK assets to release
         if: startsWith(github.ref, 'refs/tags/')
