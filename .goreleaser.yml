@@ -73,12 +73,6 @@ nfpms:
       {{- else }}{{ .Arch }}{{ end }}
     # IPK packager-specific settings.
     ipk:
-      # Set ABI version to match Entware naming.
-      abi_version: >-
-        {{- if eq .Arch "amd64" }}3.2
-        {{- else if eq .Arch "arm64" }}3.10
-        {{- else }}{{ "" }}{{ end }}
-      # Override control fields.
       fields:
         Architecture: >-
           {{- if eq .Arch "amd64" }}x64-3.2
