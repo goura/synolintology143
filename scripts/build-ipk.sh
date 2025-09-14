@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 
 # Usage (from GoReleaser build hook):
 #   bash scripts/build-ipk.sh "<binary_path>" "<version>" "<target>" "<name>"
@@ -38,7 +38,8 @@ rm -rf "$WORK_DIR"
 mkdir -p "$CTRL_DIR" "$DEST_DIR"
 
 # Install binary into /opt/bin
-install -m 0755 "$BIN_ABS" "$DEST_DIR/$NAME"
+cp "$BIN_ABS" "$DEST_DIR/$NAME"
+chmod 0755 "$DEST_DIR/$NAME"
 
 # Control metadata
 cat >"$CTRL_DIR/control" <<EOF
@@ -56,4 +57,3 @@ EOF
 opkg-build -Z gzip -o dist "$WORK_DIR" >/dev/null
 
 echo "Built IPK: $(ls -1 dist/${NAME}_${VERSION}_*.ipk)"
-

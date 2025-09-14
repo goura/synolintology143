@@ -19,9 +19,6 @@ builds:
     goarch:
       - amd64
       - arm64
-    hooks:
-      post:
-        - bash scripts/build-ipk.sh "{{ .Path }}" "{{ .Version }}" "{{ .Target }}" "{{ .ProjectName }}"
 
 # "Entware-style" install
 archives:
@@ -64,5 +61,6 @@ changelog:
       - 'Merge branch'
 
 release:
-  extra_files:
-    - glob: dist/*.ipk
+  # .ipk artifacts are built and attached in a separate workflow step
+  # after GoReleaser finishes, because opkg-utils isn't available in the
+  # goreleaser action image on ubuntu-latest.
