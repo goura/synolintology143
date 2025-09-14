@@ -63,8 +63,11 @@ jobs:
         with:
           entrypoint: /bin/sh
           args: -lc "set -e; cd /github/workspace && \
-            echo 'https://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories && \
-            apk add --no-cache opkg-utils >/dev/null && \
+            apk add --no-cache \
+              --repository https://dl-cdn.alpinelinux.org/alpine/edge/main \
+              --repository https://dl-cdn.alpinelinux.org/alpine/edge/community \
+              --repository https://dl-cdn.alpinelinux.org/alpine/edge/testing \
+              python3 opkg-utils >/dev/null && \
             ls -la dist && \
             test -f dist/synolintology143_linux_amd64/synolintology143 && \
             test -f dist/synolintology143_linux_arm64/synolintology143 && \
