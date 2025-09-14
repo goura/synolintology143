@@ -56,11 +56,20 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify release binaries exist
+        id: locate_bins
         if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
         run: |
-          ls -la dist
-          test -f dist/synolintology143_linux_amd64/synolintology143
-          test -f dist/synolintology143_linux_arm64/synolintology143
+          set -euo pipefail
+          echo "Dist tree:" && ls -la dist || true
+          AMD64_BIN="dist/synolintology143_linux_amd64_v1/synolintology143"
+          ARM64_BIN="dist/synolintology143_linux_arm64/synolintology143"
+          test -f "$AMD64_BIN"
+          test -f "$ARM64_BIN"
+          echo "amd64: $AMD64_BIN"
+          echo "arm64: $ARM64_BIN"
+          echo "amd64_bin=$AMD64_BIN" >> "$GITHUB_OUTPUT"
+          echo "arm64_bin=$ARM64_BIN" >> "$GITHUB_OUTPUT"
 
       - name: Build IPK (amd64) in Alpine
         if: startsWith(github.ref, 'refs/tags/')
@@ -73,8 +82,10 @@ jobs:
               --repository https://dl-cdn.alpinelinux.org/alpine/edge/community \
               --repository https://dl-cdn.alpinelinux.org/alpine/edge/testing \
               python3 opkg-utils >/dev/null
-            sh scripts/build-ipk.sh dist/synolintology143_linux_amd64/synolintology143 "${TAG_NAME}" linux_amd64 synolintology143
+            sh scripts/build-ipk.sh "${AMD64_BIN}" "${TAG_NAME}" linux_amd64 synolintology143
           '
+        env:
+          AMD64_BIN: ${{ steps.locate_bins.outputs.amd64_bin }}
 
       - name: Build IPK (arm64) in Alpine
         if: startsWith(github.ref, 'refs/tags/')
@@ -87,8 +98,10 @@ jobs:
               --repository https://dl-cdn.alpinelinux.org/alpine/edge/community \
               --repository https://dl-cdn.alpinelinux.org/alpine/edge/testing \
               python3 opkg-utils >/dev/null
-            sh scripts/build-ipk.sh dist/synolintology143_linux_arm64/synolintology143 "${TAG_NAME}" linux_arm64 synolintology143
+            sh scripts/build-ipk.sh "${ARM64_BIN}" "${TAG_NAME}" linux_arm64 synolintology143
           '
+        env:
+          ARM64_BIN: ${{ steps.locate_bins.outputs.arm64_bin }}
 
       - name: Upload IPK assets to release
         if: startsWith(github.ref, 'refs/tags/')

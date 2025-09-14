@@ -20,6 +20,8 @@ builds:
     goarch:
       - amd64
       - arm64
+    # Make GOAMD64 explicit so dist folder names are stable (linux_amd64_v1)
+    goamd64: v1
 
 # "Entware-style" install
 archives:
