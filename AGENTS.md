@@ -10,9 +10,8 @@ This file guides agents and contributors working in this repository. It applies 
 Strict rules for CLI behavior. Any change must keep these guarantees and update tests/README if needed.
 
 - Stdout
-  - Print a newline‑separated list of violating file paths only.
-  - Print nothing to stdout when there are no violations.
-  - Each violating path ends with a single newline. No extra commentary.
+  - Default mode: print a newline‑separated list of violating file paths only. Print nothing to stdout when there are no violations. Each violating path ends with a single newline. No extra commentary.
+  - JSON mode (`-j`/`--json`): print a single JSON array of violating file paths to stdout. On success, print `[]` (valid JSON). A trailing newline after the JSON value is acceptable.
 - Stderr
   - Progress banners: `--- Scanning: <path> ---`.
   - Warnings and helpful notes live here.
@@ -23,17 +22,18 @@ Strict rules for CLI behavior. Any change must keep these guarantees and update 
   - `1`: violations found (stdout has paths).
   - `2`: usage error (e.g., missing args).
 - Quiet flag
-  - `-q` / `--quiet` silences stderr (progress, warnings, summaries). Stdout behavior unchanged.
+  - `-q` / `--quiet` silences stderr (progress, warnings, summaries). Stdout behavior unchanged (newline list in default mode; JSON array in JSON mode).
 
 ## Code Structure
 - `cmd/synolintology143/main.go`
-  - Parses flags/args (`-q/--quiet`).
+  - Parses flags/args (`-q/--quiet`, `-j/--json`).
   - Wires scanner writers (silences `ErrWriter` when quiet).
   - Handles exit codes and minimal stderr notes.
 - `internal/scanner/scanner.go`
   - Core walk/scan logic and limit constant (`MAX_ECRYPTFS_FILENAME_BYTES = 143`).
   - Writers: `OutWriter` (defaults to `os.Stdout`), `ErrWriter` (defaults to `os.Stderr`).
   - Print violating paths with `fmt.Fprintln(OutWriter, path)`; log info/warnings to `ErrWriter`.
+  - JSON mode is implemented by wrapping `OutWriter` in the CLI with a writer that formats newline events into a JSON array; the scanner remains unchanged.
 
 ## Tests
 - Location: `internal/scanner/scanner_test.go`.
@@ -41,6 +41,7 @@ Strict rules for CLI behavior. Any change must keep these guarantees and update 
   - Capture `scanner.OutWriter` via an `os.Pipe()` to assert stdout exactly.
   - Set `scanner.ErrWriter = io.Discard` in tests to avoid progress noise.
   - Verify: no stdout for clean trees; newline‑separated paths for violations; no good files in output.
+- JSON tests live in `cmd/synolintology143/main_test.go` and exercise the JSON writer by wrapping `scanner.OutWriter`.
 - Run: `go test ./...`
 
 ## Development Workflow
@@ -72,4 +73,3 @@ Strict rules for CLI behavior. Any change must keep these guarantees and update 
 ## Updating Limits (If Ever Needed)
 - Byte limit is hard‑coded at 143. If the requirement changes, update:
   - `internal/scanner/scanner.go` constant, tests assertions, README, and this file.
-

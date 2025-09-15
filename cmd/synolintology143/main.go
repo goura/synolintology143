@@ -14,11 +14,14 @@ func main() {
 	// Parse flags and paths (support -q/--quiet before paths).
 	args := os.Args[1:]
 	var quiet bool
+	var jsonMode bool
 	var pathsToScan []string
 	for _, a := range args {
 		switch a {
 		case "-q", "--quiet":
 			quiet = true
+		case "-j", "--json":
+			jsonMode = true
 		default:
 			pathsToScan = append(pathsToScan, a)
 		}
@@ -27,7 +30,7 @@ func main() {
 	// Check if the user provided at least one path to scan.
 	if len(pathsToScan) == 0 {
 		// Print usage instructions to standard error.
-		fmt.Fprintf(os.Stderr, "Usage: %s [-q|--quiet] <path-1> [path-2]...\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage: %s [-q|--quiet] [-j|--json] <path-1> [path-2]...\n", os.Args[0])
 		// Exit with code 2 for a usage error, a common convention.
 		os.Exit(2)
 	}
@@ -37,8 +40,21 @@ func main() {
 		scanner.ErrWriter = io.Discard
 	}
 
+	// If JSON mode is requested, wrap scanner.OutWriter with a JSON list writer.
+	var closer interface{ Close() error }
+	if jsonMode {
+		jw := newJSONListWriter(os.Stdout)
+		scanner.OutWriter = jw
+		closer = jw
+	}
+
 	// Call the Run function from our scanner package and get the result.
 	violationsFound, err := scanner.Run(pathsToScan)
+
+	// If we were writing JSON, close the writer to flush closing bracket.
+	if closer != nil {
+		_ = closer.Close()
+	}
 	if err != nil {
 		// If the scanner itself had a critical error (not just a violation), print it.
 		fmt.Fprintf(os.Stderr, "A critical error occurred: %v\n", err)

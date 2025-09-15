@@ -11,6 +11,7 @@ Run it against one or more directories. It's read-only and won't change a thing.
 
 Flags:
 - `-q`, `--quiet` — silence stderr (progress and friendly messages). Stdout behavior is unchanged.
+- `-j`, `--json` — emit a single JSON array of violating paths to stdout. On success, prints `[]` (still exits 0).
 
 ### Scan two shares for any problematic filenames
 synolintology143 /share/Photos /share/Documents
@@ -28,7 +29,7 @@ All good: no violating filenames found.
 ```
 
 #### If it finds a problem:
-It prints violating file paths to stdout (newline-separated, one per line) and exits with code 1. Helpful info goes to stderr.
+By default, it prints violating file paths to stdout (newline-separated, one per line) and exits with code 1. Helpful info goes to stderr.
 
 stderr:
 ```
@@ -78,3 +79,11 @@ Use either the pre-commit framework or a plain Git hook to enforce `gofmt`.
   - Set hooks path: `git config core.hooksPath scripts/githooks`
   - Make it executable: `chmod +x scripts/githooks/pre-commit`
   - Now commits will fail if any staged `.go` files aren’t `gofmt`-clean.
+JSON mode examples:
+```
+# JSON array on stdout; stderr still shows progress unless -q
+synolintology143 --json /share/Photos > offenders.json
+
+# Quiet + JSON for machine use
+synolintology143 -q -j /share/Photos | jq '. | length'
+```
